@@ -142,6 +142,48 @@
 }
 
 /*
+ * Custom scrollbars. Chromium-only (matches app's browser target).
+ * The default thumb is barely visible in light mode against white.
+ * Thumb floats inside the track via a transparent border + padding-box clip.
+ */
+:root {
+  color-scheme: light;
+  --scrollbar-thumb: oklch(0.78 0 0);
+  --scrollbar-thumb-hover: oklch(0.55 0 0);
+}
+
+.dark {
+  color-scheme: dark;
+  --scrollbar-thumb: oklch(0.5 0 0);
+  --scrollbar-thumb-hover: oklch(0.72 0 0);
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 100px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/*
  * Document-style accents for rendered markdown.
  * Inspired by the sample.html reference: corporate blue accent on h1/h2
  * underlines and links, bordered tables with gray header rows, blockquotes
@@ -169,6 +211,7 @@
 }
 
 .prose.note-prose h1 {
+  font-size: 1.75em;
   border-bottom: 3px solid var(--doc-accent);
   padding-bottom: 0.3em;
   margin-bottom: 0.5em;

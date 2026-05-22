@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Pencil, Save, X } from 'lucide-react'
+import { Moon, Pencil, Save, Sun, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,9 +8,32 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useTheme } from '@/lib/theme'
 import { isDraftDirty, useAppStore, type Page } from '@/store/use-app-store'
 
 import { DiscardDialog } from './discard-dialog'
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === 'dark'
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          size="icon-sm"
+          variant="outline"
+          onClick={toggleTheme}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun /> : <Moon />}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <span>{isDark ? 'Light mode' : 'Dark mode'}</span>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
 
 const isMac =
   typeof navigator !== 'undefined' &&
@@ -43,10 +66,13 @@ export function PageHeader({ page }: { page: Page }) {
     return (
       <div className="flex items-center justify-between h-[49px] border-b px-6">
         <h1 className="text-base font-medium">{page.title || 'Untitled'}</h1>
-        <Button size="sm" variant="outline" onClick={() => beginEdit(page.id)}>
-          <Pencil />
-          Edit
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => beginEdit(page.id)}>
+            <Pencil />
+            Edit
+          </Button>
+          <ThemeToggle />
+        </div>
       </div>
     )
   }
@@ -68,7 +94,7 @@ export function PageHeader({ page }: { page: Page }) {
         placeholder="Untitled"
         className="max-w-md text-base font-medium"
       />
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Button size="sm" variant="outline" onClick={handleCancel}>
           <X />
           Cancel
@@ -92,6 +118,7 @@ export function PageHeader({ page }: { page: Page }) {
             </span>
           </TooltipContent>
         </Tooltip>
+        <ThemeToggle />
       </div>
       <DiscardDialog
         open={discardOpen}

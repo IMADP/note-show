@@ -40,9 +40,9 @@ export type AppState = {
 
 const now = () => new Date().toISOString()
 
-const WELCOME_CONTENT = `# Welcome to note-show
+const WELCOME_CONTENT = `# Welcome to Note Show
 
-This is **note-show**, a single user, offline, local-first markdown notebook. Everything you type lives in one JSON file on your hard drive. No accounts, no servers, no sync, no telemetry. The browser is just a renderer; your data is yours.
+This is **note show**, a single user, offline, local-first markdown notebook. Everything you type lives in one JSON file on your hard drive. No accounts, no servers, no sync, no telemetry. The browser is just a renderer; your data is yours.
 
 If you opened this page in a fresh notebook, you can safely delete it once you have read through. It is a regular page like any other, and the file you created is now ready for you to write in.
 
