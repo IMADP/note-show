@@ -81,7 +81,7 @@ The renderer supports the full set of features a working writer needs. The next 
 
 The usual suspects: **bold**, *italic*, ***bold and italic***, ~~struck through~~, and \`inline code\`. You can also link to things, both [external sites like example.com](https://example.com) and other pages within the same notebook by their URL.
 
-Autolinks work too: paste a URL like https://wikipedia.org and it becomes a link. Email addresses such as someone@example.com are autolinked as well.
+Autolinks work too: paste a URL like https://wikipedia.org and it becomes a link. 
 
 ### Headings
 

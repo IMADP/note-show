@@ -70,6 +70,9 @@ const loadedLangs = new Set(highlighter.getLoadedLanguages())
 const isExternalLink = (href: string | undefined) =>
   !!href && /^https?:\/\//i.test(href)
 
+const isMailtoLink = (href: string | undefined) =>
+  !!href && /^mailto:/i.test(href)
+
 type CodeChildProps = {
   className?: string
   children?: string
@@ -128,6 +131,10 @@ function CodeBlock({ children }: ComponentProps<'pre'>) {
 
 const components: ComponentProps<typeof ReactMarkdown>['components'] = {
   a({ href, children, ...rest }) {
+    if (isMailtoLink(href)) {
+      // GFM autolinks emails. We want bare URLs autolinked but not emails.
+      return <>{children}</>
+    }
     if (isExternalLink(href)) {
       return (
         <a href={href} target="_blank" rel="noreferrer noopener" {...rest}>
