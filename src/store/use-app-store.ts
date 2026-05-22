@@ -283,29 +283,6 @@ Suppose you keep meeting notes in this notebook. Here is a single page, top to b
 - [ ] Marcus: post the spike write up to the team channel by Friday.
 - [x] Lena (deferred): catch up on the recording.
 
-### Notes
-
-Marcus brought up that the rejection logic still has the old branch that handles A-End vs Z-End separately. We should consolidate this once the Site field is propagated everywhere. See the table below.
-
-| Route field             | Old behavior        | New behavior                                       |
-|-------------------------|---------------------|----------------------------------------------------|
-| \`orderSourceIdentifier\` | Order name          | \`route_id\` when \`Site\` is set, else order name     |
-| \`Site\`                  | (not present)       | \`"A-End"\` or \`"Z-End"\`, optional                   |
-| Response shape          | Order level status  | Order level status plus echoed \`Site\`              |
-
-### Code snippet referenced during the call
-
-\`\`\`json
-{
-  "requestType": "VALIDATE_ADDRESS",
-  "orderSourceIdentifier": "route_id",
-  "site": "A-End",
-  "orderPayload": {
-    "orderData": "<EO JSON omitted for brevity>"
-  }
-}
-\`\`\`
-
 That should be enough context for next week's review.
 
 ---
