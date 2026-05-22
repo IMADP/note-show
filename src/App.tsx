@@ -32,7 +32,11 @@ function App() {
           </SidebarInset>
         </SidebarProvider>
       </HashRouter>
-      <Toaster position="bottom-left" />
+      <Toaster
+        position="bottom-left"
+        offset={{ left: '1rem', bottom: '1rem' }}
+        mobileOffset={{ left: '1rem', bottom: '1rem' }}
+      />
     </TooltipProvider>
   )
 }

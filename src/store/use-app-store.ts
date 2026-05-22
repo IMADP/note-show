@@ -205,6 +205,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       editingId: null,
       draft: null,
     })
+    toast.success(`Opened ${result.handle.name}`)
   },
 
   createFile: async () => {

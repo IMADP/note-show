@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Pencil, Save, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -27,8 +27,17 @@ export function PageHeader({ page }: { page: Page }) {
   const updateDraft = useAppStore((s) => s.updateDraft)
 
   const [discardOpen, setDiscardOpen] = useState(false)
+  const titleRef = useRef<HTMLInputElement>(null)
 
   const isEditingThis = mode === 'edit' && editingId === page.id
+
+  useEffect(() => {
+    if (!isEditingThis) return
+    const el = titleRef.current
+    if (!el) return
+    el.focus()
+    el.select()
+  }, [isEditingThis, editingId])
 
   if (!isEditingThis) {
     return (
@@ -53,6 +62,7 @@ export function PageHeader({ page }: { page: Page }) {
   return (
     <div className="flex items-center justify-between gap-3 h-[49px] border-b px-6">
       <Input
+        ref={titleRef}
         value={draft?.title ?? ''}
         onChange={(e) => updateDraft({ title: e.target.value })}
         placeholder="Untitled"
