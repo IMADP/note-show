@@ -284,6 +284,28 @@
   font-weight: 600;
 }
 
+.prose.note-prose ul,
+.prose.note-prose ol {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.prose.note-prose li {
+  margin-top: 0.15em;
+  margin-bottom: 0.15em;
+}
+
+.prose.note-prose li > p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.prose.note-prose li > ul,
+.prose.note-prose li > ol {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+
 /*
  * Code blocks: Shiki output rendered directly via codeToHtml() inside the
  * CodeBlock React component, wrapped as:
