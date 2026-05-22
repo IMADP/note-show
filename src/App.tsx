@@ -32,7 +32,7 @@ function App() {
           </SidebarInset>
         </SidebarProvider>
       </HashRouter>
-      <Toaster />
+      <Toaster position="bottom-left" />
     </TooltipProvider>
   )
 }
