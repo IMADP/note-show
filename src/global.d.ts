@@ -52,3 +52,8 @@ interface Window {
     options?: SaveFilePickerOptions,
   ): Promise<FileSystemFileHandle>
 }
+
+declare module '*.md?raw' {
+  const content: string
+  export default content
+}
