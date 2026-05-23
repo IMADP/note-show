@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { useMatch, useNavigate } from 'react-router-dom'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 import {
   AlertDialog,
@@ -34,6 +36,20 @@ export function PageListItem({ page }: { page: Page }) {
 
   const isActive = activeId === page.id
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: page.id })
+
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   const navigateTo = (id: string) => navigate(`/page/${id}`)
 
   const handleClick = () => {
@@ -57,13 +73,19 @@ export function PageListItem({ page }: { page: Page }) {
   }
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem
+      ref={setNodeRef}
+      style={dragStyle}
+      className={cn(isDragging && 'z-10 opacity-70')}
+    >
       <SidebarMenuButton
         size="lg"
         isActive={isActive}
         onClick={handleClick}
+        {...attributes}
+        {...listeners}
         className={cn(
-          'cursor-pointer pl-3 text-base',
+          'cursor-pointer touch-none select-none pl-3 text-base',
           isActive &&
             'bg-primary/10 text-foreground font-medium hover:bg-primary/15 data-[active=true]:bg-primary/10 data-[active=true]:text-foreground',
         )}

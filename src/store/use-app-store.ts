@@ -28,6 +28,7 @@ export type AppState = {
   addPage: () => string
   deletePage: (id: string) => void
   renamePage: (id: string, title: string) => void
+  reorderPages: (activeId: string, overId: string) => void
 
   beginEdit: (id: string) => void
   cancelEdit: () => void
@@ -462,6 +463,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     const nextPages = state.pages.map((p) =>
       p.id === id ? { ...p, title, updatedAt: now() } : p,
     )
+    set({ pages: nextPages })
+    void persist(state.fileHandle, nextPages)
+  },
+
+  reorderPages: (activeId, overId) => {
+    if (activeId === overId) return
+    const state = get()
+    const from = state.pages.findIndex((p) => p.id === activeId)
+    const to = state.pages.findIndex((p) => p.id === overId)
+    if (from === -1 || to === -1) return
+    const nextPages = state.pages.slice()
+    const [moved] = nextPages.splice(from, 1)
+    nextPages.splice(to, 0, moved)
     set({ pages: nextPages })
     void persist(state.fileHandle, nextPages)
   },
