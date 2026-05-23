@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MoreHorizontal, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useMatch, useNavigate } from 'react-router-dom'
 
 import {
@@ -12,12 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -65,35 +59,30 @@ export function PageListItem({ page }: { page: Page }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
+        size="lg"
         isActive={isActive}
         onClick={handleClick}
         className={cn(
-          'cursor-pointer',
+          'cursor-pointer text-base',
           isActive &&
             'bg-primary/10 text-foreground font-medium hover:bg-primary/15 data-[active=true]:bg-primary/10 data-[active=true]:text-foreground',
         )}
       >
         <span className="truncate">{page.title || 'Untitled'}</span>
       </SidebarMenuButton>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuAction showOnHover aria-label="Page actions">
-            <MoreHorizontal />
-          </SidebarMenuAction>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" align="start">
-          <DropdownMenuItem
-            variant="destructive"
-            onSelect={(e) => {
-              e.preventDefault()
-              setConfirmDeleteOpen(true)
-            }}
-          >
-            <Trash2 />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <SidebarMenuAction
+        showOnHover
+        aria-label="Delete page"
+        title="Delete page"
+        className="cursor-pointer hover:bg-destructive/10 hover:text-destructive"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setConfirmDeleteOpen(true)
+        }}
+      >
+        <Trash2 />
+      </SidebarMenuAction>
 
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>

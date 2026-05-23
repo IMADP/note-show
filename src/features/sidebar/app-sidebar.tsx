@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
@@ -42,19 +43,25 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Pages</SidebarGroupLabel>
-          <SidebarGroupAction
-            title="New page"
-            aria-label="New page"
-            onClick={handleAdd}
-            className="right-[13px] cursor-pointer"
-          >
-            <Plus />
-          </SidebarGroupAction>
           <SidebarGroupContent>
             <PageList />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarSeparator className="mx-0" />
+      <SidebarFooter className="p-0">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleAdd}
+              className="h-[48px] cursor-pointer justify-center rounded-none px-4 text-sm font-medium"
+            >
+              <Plus />
+              <span>Add Page</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
