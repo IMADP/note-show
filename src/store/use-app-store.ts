@@ -92,7 +92,7 @@ The flow is short:
 1. Open or create a notebook through the file menu at the top of the sidebar.
 2. Click **Add Folder** at the bottom of the sidebar to create a folder.
 3. Click **Add Page** inside a folder to create a page.
-4. Click **Edit**, or pick an existing page and click its **Edit** button.
+4. Hover the page in the sidebar and click the pencil icon to edit it, or right-click the page row as a shortcut.
 5. Write. Hit \`Ctrl+S\` (or \`⌘S\` on macOS) to save. The editor closes and the page renders.
 6. Repeat.
 
@@ -103,6 +103,8 @@ The file menu also lets you switch between notebooks. Each notebook is a separat
 **Renaming.** Double-click a folder name or a page name in the sidebar to rename it in place. Press Enter to commit, or Escape to back out. Page titles can also be edited from the title field at the top of the page while you are in edit mode.
 
 **Reordering.** Drag a folder up or down to reorder folders. Drag a page within its folder to reorder, or drag it onto another folder (including a collapsed one) to move it across. Every drop saves to disk immediately, just like every other change.
+
+**Editing.** Hover a page in the sidebar and a pencil icon appears next to the trash. Click it to open the page in edit mode. Right-clicking the page row does the same thing, which is the fastest way once you get used to it. The title is editable from the input at the top of the page while editing.
 
 **Removing.** Hover a page or folder in the sidebar and click the trash icon that appears. You will be asked to confirm. Deleting a folder deletes the pages inside it too.
 
@@ -176,12 +178,14 @@ And for self-explanation, like an editorial aside in a longer piece:
 
 Tables look like this:
 
-| Shortcut      | Action                              |
-|---------------|-------------------------------------|
-| \`Ctrl+S\`      | Save the current draft              |
-| \`Ctrl+Enter\`  | Save the current draft (alternate)  |
-| \`Esc\`         | Cancel the current edit             |
-| Click sidebar | Switch to another page              |
+| Shortcut         | Action                              |
+|------------------|-------------------------------------|
+| \`Ctrl+S\`         | Save the current draft              |
+| \`Ctrl+Enter\`     | Save the current draft (alternate)  |
+| \`Esc\`            | Cancel the current edit             |
+| Click sidebar    | Switch to another page              |
+| Right-click page | Open that page in edit mode         |
+| Double-click     | Rename a page or folder in place    |
 
 Alignment is supported with the usual \`:---\`, \`:---:\`, \`---:\` markers:
 

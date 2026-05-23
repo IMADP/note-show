@@ -165,38 +165,46 @@ export function FolderItem({ folder }: { folder: Folder }) {
           </div>
         )}
 
-        {!isRenaming && (
-          <>
-            <button
-              type="button"
-              aria-label="Add page"
-              title="Add page"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.preventDefault()
-                handleAddPage(e)
-              }}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground/0 group-hover/folder:text-muted-foreground/80 hover:bg-sidebar-accent hover:text-foreground cursor-pointer transition-colors"
-            >
-              <Plus className="size-4" />
-            </button>
+        <button
+          type="button"
+          aria-label="Add page"
+          title="Add page"
+          tabIndex={isRenaming ? -1 : 0}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault()
+            handleAddPage(e)
+          }}
+          className={cn(
+            'flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors',
+            isRenaming
+              ? 'pointer-events-none text-muted-foreground/40'
+              : 'cursor-pointer text-muted-foreground/0 group-hover/folder:text-muted-foreground/80 hover:bg-sidebar-accent hover:text-foreground',
+          )}
+        >
+          <Plus className="size-4" />
+        </button>
 
-            <button
-              type="button"
-              aria-label="Delete folder"
-              title="Delete folder"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setConfirmDeleteOpen(true)
-              }}
-              className="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground/0 group-hover/folder:text-muted-foreground/80 hover:bg-destructive/10 hover:text-destructive cursor-pointer transition-colors"
-            >
-              <Trash2 className="size-4" />
-            </button>
-          </>
-        )}
+        <button
+          type="button"
+          aria-label="Delete folder"
+          title="Delete folder"
+          tabIndex={isRenaming ? -1 : 0}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setConfirmDeleteOpen(true)
+          }}
+          className={cn(
+            '-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors',
+            isRenaming
+              ? 'pointer-events-none text-muted-foreground/40'
+              : 'cursor-pointer text-muted-foreground/0 group-hover/folder:text-muted-foreground/80 hover:bg-destructive/10 hover:text-destructive',
+          )}
+        >
+          <Trash2 className="size-4" />
+        </button>
       </div>
 
       <div

@@ -3,7 +3,6 @@ import { Navigate, useParams } from 'react-router-dom'
 import { locatePage, useAppStore } from '@/store/use-app-store'
 
 import { PageEdit } from './page-edit'
-import { PageHeader } from './page-header'
 import { PageView } from './page-view'
 
 export function PageRoute() {
@@ -21,8 +20,7 @@ export function PageRoute() {
   const isEditingThis = mode === 'edit' && editingId === page.id
 
   return (
-    <div className="flex h-full flex-col">
-      <PageHeader page={page} />
+    <div className="h-full">
       {isEditingThis ? <PageEdit /> : <PageView page={page} />}
     </div>
   )

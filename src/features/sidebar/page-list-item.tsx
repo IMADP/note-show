@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { useMatch, useNavigate } from 'react-router-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -38,9 +38,11 @@ export function PageListItem({
   const deletePage = useAppStore((s) => s.deletePage)
   const renamePage = useAppStore((s) => s.renamePage)
   const cancelEdit = useAppStore((s) => s.cancelEdit)
+  const beginEdit = useAppStore((s) => s.beginEdit)
 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [pendingNavId, setPendingNavId] = useState<string | null>(null)
+  const [pendingEditId, setPendingEditId] = useState<string | null>(null)
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameValue, setRenameValue] = useState(page.title)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -110,6 +112,25 @@ export function PageListItem({
     return flat[idx + 1] ?? flat[idx - 1] ?? null
   }
 
+  const startEdit = (id: string) => {
+    if (id !== activeId) navigateTo(id)
+    beginEdit(id)
+  }
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const state = useAppStore.getState()
+    const alreadyEditingThis =
+      state.mode === 'edit' && state.editingId === page.id
+    if (alreadyEditingThis) return
+    if (isDraftDirty(state)) {
+      setPendingEditId(page.id)
+      return
+    }
+    startEdit(page.id)
+  }
+
   const handleDelete = () => {
     const nextId = findNeighborPageId()
     deletePage(page.id)
@@ -126,7 +147,7 @@ export function PageListItem({
       className={cn('group/page', isDragging && 'z-10 opacity-70')}
     >
       {isRenaming ? (
-        <div className="flex h-10 w-full items-center rounded-md pl-6 pr-2">
+        <div className="flex h-10 w-full items-center rounded-md pl-6 pr-14">
           <Input
             ref={inputRef}
             value={renameValue}
@@ -156,10 +177,11 @@ export function PageListItem({
             e.stopPropagation()
             startRename()
           }}
+          onContextMenu={handleEditClick}
           {...attributes}
           {...listeners}
           className={cn(
-            'cursor-pointer active:cursor-grabbing touch-none select-none pl-6 pr-8 text-base',
+            'cursor-pointer active:cursor-grabbing touch-none select-none pl-6 pr-14 text-base',
             isActive &&
               'bg-primary/10 text-foreground font-medium hover:bg-primary/15 data-[active=true]:bg-primary/10 data-[active=true]:text-foreground',
           )}
@@ -168,22 +190,42 @@ export function PageListItem({
         </SidebarMenuButton>
       )}
 
-      {!isRenaming && (
-        <SidebarMenuAction
-          showOnHover
-          aria-label="Delete page"
-          title="Delete page"
-          className="cursor-pointer hover:bg-destructive/10 hover:text-destructive"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setConfirmDeleteOpen(true)
-          }}
-        >
-          <Trash2 />
-        </SidebarMenuAction>
-      )}
+      <SidebarMenuAction
+        showOnHover={!isRenaming}
+        aria-label="Edit page"
+        title="Edit page"
+        tabIndex={isRenaming ? -1 : 0}
+        className={cn(
+          'right-8 hover:bg-primary/10 hover:text-primary',
+          isRenaming
+            ? 'top-2.5 pointer-events-none text-muted-foreground/40'
+            : 'cursor-pointer',
+        )}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={handleEditClick}
+      >
+        <Pencil />
+      </SidebarMenuAction>
+      <SidebarMenuAction
+        showOnHover={!isRenaming}
+        aria-label="Delete page"
+        title="Delete page"
+        tabIndex={isRenaming ? -1 : 0}
+        className={cn(
+          'hover:bg-destructive/10 hover:text-destructive',
+          isRenaming
+            ? 'top-2.5 pointer-events-none text-muted-foreground/40'
+            : 'cursor-pointer',
+        )}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setConfirmDeleteOpen(true)
+        }}
+      >
+        <Trash2 />
+      </SidebarMenuAction>
 
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>
@@ -210,6 +252,19 @@ export function PageListItem({
           setPendingNavId(null)
           cancelEdit()
           if (target) navigateTo(target)
+        }}
+      />
+
+      <DiscardDialog
+        open={pendingEditId !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingEditId(null)
+        }}
+        onConfirm={() => {
+          const target = pendingEditId
+          setPendingEditId(null)
+          cancelEdit()
+          if (target) startEdit(target)
         }}
       />
     </SidebarMenuItem>

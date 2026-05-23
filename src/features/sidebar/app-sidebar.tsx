@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
+import { ThemeToggle } from '@/features/theme-toggle'
 import { useAppStore } from '@/store/use-app-store'
 
 import { FileMenu } from './file-menu'
@@ -41,16 +42,21 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarSeparator className="mx-0" />
       <SidebarFooter className="p-0">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleAdd}
-              className="h-[48px] cursor-pointer justify-center rounded-none px-4 text-sm font-medium"
-            >
-              <span>Add Folder</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex h-[48px] items-stretch">
+          <ThemeToggle />
+          <div className="min-w-0 flex-1">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleAdd}
+                  className="h-[48px] cursor-pointer justify-center rounded-none px-4 text-sm font-medium"
+                >
+                  <span>Add Folder</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   )
