@@ -1,11 +1,11 @@
-import type { Page } from '@/store/use-app-store'
+import type { Folder } from '@/store/use-app-store'
 
 export type FileFormat = {
-  version: 1
-  pages: Page[]
+  version: 2
+  folders: Folder[]
 }
 
-export const CURRENT_VERSION = 1 as const
+export const CURRENT_VERSION = 2 as const
 
 export function serialize(data: FileFormat): string {
   return JSON.stringify(data, null, 2)
@@ -14,7 +14,7 @@ export function serialize(data: FileFormat): string {
 export function parse(raw: string): FileFormat {
   const trimmed = raw.trim()
   if (trimmed.length === 0) {
-    return { version: CURRENT_VERSION, pages: [] }
+    return { version: CURRENT_VERSION, folders: [] }
   }
 
   let parsed: unknown
@@ -33,7 +33,7 @@ export function parse(raw: string): FileFormat {
   const obj = parsed as Record<string, unknown>
 
   if (Object.keys(obj).length === 0) {
-    return { version: CURRENT_VERSION, pages: [] }
+    return { version: CURRENT_VERSION, folders: [] }
   }
 
   const version = obj.version
@@ -42,7 +42,12 @@ export function parse(raw: string): FileFormat {
       `Notebook version ${version} is newer than this app supports (${CURRENT_VERSION}).`,
     )
   }
+  if (typeof version === 'number' && version < CURRENT_VERSION) {
+    throw new Error(
+      `Notebook version ${version} is older than this app supports (${CURRENT_VERSION}). This release introduced folders and is not backwards compatible.`,
+    )
+  }
 
-  const pages = Array.isArray(obj.pages) ? (obj.pages as Page[]) : []
-  return { version: CURRENT_VERSION, pages }
+  const folders = Array.isArray(obj.folders) ? (obj.folders as Folder[]) : []
+  return { version: CURRENT_VERSION, folders }
 }

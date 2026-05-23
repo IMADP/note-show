@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { useMatch, useNavigate } from 'react-router-dom'
 import { useSortable } from '@dnd-kit/sortable'
@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Input } from '@/components/ui/input'
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -24,15 +25,25 @@ import { DiscardDialog } from '@/features/page/discard-dialog'
 import { cn } from '@/lib/utils'
 import { isDraftDirty, useAppStore, type Page } from '@/store/use-app-store'
 
-export function PageListItem({ page }: { page: Page }) {
+export function PageListItem({
+  page,
+  folderId,
+}: {
+  page: Page
+  folderId: string
+}) {
   const match = useMatch('/page/:id')
   const activeId = match?.params.id
   const navigate = useNavigate()
   const deletePage = useAppStore((s) => s.deletePage)
+  const renamePage = useAppStore((s) => s.renamePage)
   const cancelEdit = useAppStore((s) => s.cancelEdit)
 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [pendingNavId, setPendingNavId] = useState<string | null>(null)
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [renameValue, setRenameValue] = useState(page.title)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const isActive = activeId === page.id
 
@@ -43,12 +54,23 @@ export function PageListItem({ page }: { page: Page }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: page.id })
+  } = useSortable({
+    id: page.id,
+    data: { type: 'page', pageId: page.id, folderId },
+  })
 
   const dragStyle = {
     transform: CSS.Transform.toString(transform),
     transition,
   }
+
+  useEffect(() => {
+    if (!isRenaming) return
+    const el = inputRef.current
+    if (!el) return
+    el.focus()
+    el.select()
+  }, [isRenaming])
 
   const navigateTo = (id: string) => navigate(`/page/${id}`)
 
@@ -61,13 +83,38 @@ export function PageListItem({ page }: { page: Page }) {
     navigateTo(page.id)
   }
 
+  const startRename = () => {
+    setRenameValue(page.title)
+    setIsRenaming(true)
+  }
+
+  const commitRename = () => {
+    const trimmed = renameValue.trim() || 'Untitled'
+    if (trimmed !== page.title) renamePage(page.id, trimmed)
+    setIsRenaming(false)
+  }
+
+  const cancelRename = () => {
+    setRenameValue(page.title)
+    setIsRenaming(false)
+  }
+
+  const findNeighborPageId = (): string | null => {
+    const folders = useAppStore.getState().folders
+    const flat: string[] = []
+    for (const f of folders) {
+      for (const p of f.pages) flat.push(p.id)
+    }
+    const idx = flat.indexOf(page.id)
+    if (idx === -1) return null
+    return flat[idx + 1] ?? flat[idx - 1] ?? null
+  }
+
   const handleDelete = () => {
-    const pages = useAppStore.getState().pages
-    const idx = pages.findIndex((p) => p.id === page.id)
-    const nextTarget = pages[idx + 1] ?? pages[idx - 1] ?? null
+    const nextId = findNeighborPageId()
     deletePage(page.id)
     if (isActive) {
-      navigate(nextTarget ? `/page/${nextTarget.id}` : '/')
+      navigate(nextId ? `/page/${nextId}` : '/')
     }
     setConfirmDeleteOpen(false)
   }
@@ -76,35 +123,67 @@ export function PageListItem({ page }: { page: Page }) {
     <SidebarMenuItem
       ref={setNodeRef}
       style={dragStyle}
-      className={cn(isDragging && 'z-10 opacity-70')}
+      className={cn('group/page', isDragging && 'z-10 opacity-70')}
     >
-      <SidebarMenuButton
-        size="md"
-        isActive={isActive}
-        onClick={handleClick}
-        {...attributes}
-        {...listeners}
-        className={cn(
-          'cursor-pointer touch-none select-none pl-3 text-base',
-          isActive &&
-            'bg-primary/10 text-foreground font-medium hover:bg-primary/15 data-[active=true]:bg-primary/10 data-[active=true]:text-foreground',
-        )}
-      >
-        <span className="truncate">{page.title || 'Untitled'}</span>
-      </SidebarMenuButton>
-      <SidebarMenuAction
-        showOnHover
-        aria-label="Delete page"
-        title="Delete page"
-        className="cursor-pointer hover:bg-destructive/10 hover:text-destructive"
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setConfirmDeleteOpen(true)
-        }}
-      >
-        <Trash2 />
-      </SidebarMenuAction>
+      {isRenaming ? (
+        <div className="flex h-10 w-full items-center rounded-md pl-6 pr-2">
+          <Input
+            ref={inputRef}
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commitRename()
+              } else if (e.key === 'Escape') {
+                e.preventDefault()
+                cancelRename()
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="h-7 text-base"
+          />
+        </div>
+      ) : (
+        <SidebarMenuButton
+          size="md"
+          isActive={isActive}
+          onClick={handleClick}
+          onDoubleClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            startRename()
+          }}
+          {...attributes}
+          {...listeners}
+          className={cn(
+            'cursor-pointer active:cursor-grabbing touch-none select-none pl-6 pr-8 text-base',
+            isActive &&
+              'bg-primary/10 text-foreground font-medium hover:bg-primary/15 data-[active=true]:bg-primary/10 data-[active=true]:text-foreground',
+          )}
+        >
+          <span className="truncate">{page.title || 'Untitled'}</span>
+        </SidebarMenuButton>
+      )}
+
+      {!isRenaming && (
+        <SidebarMenuAction
+          showOnHover
+          aria-label="Delete page"
+          title="Delete page"
+          className="cursor-pointer hover:bg-destructive/10 hover:text-destructive"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setConfirmDeleteOpen(true)
+          }}
+        >
+          <Trash2 />
+        </SidebarMenuAction>
+      )}
 
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>
