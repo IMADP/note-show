@@ -13,14 +13,29 @@ export function FileMenu() {
   const fileName = useAppStore((s) => s.fileName)
   const openFile = useAppStore((s) => s.openFile)
   const createFile = useAppStore((s) => s.createFile)
+  const restorable = useAppStore((s) => s.restorable)
+  const restoreLastFile = useAppStore((s) => s.restoreLastFile)
 
   const noFile = !fileName
   const Icon = noFile ? AlertTriangle : FileText
+
+  const title = noFile
+    ? restorable
+      ? `Right click to load '${restorable.fileName}'`
+      : 'No File Selected'
+    : fileName
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!restorable) return
+    e.preventDefault()
+    void restoreLastFile()
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
+          onContextMenu={handleContextMenu}
           title={
             noFile ? 'No file open — changes will be lost on refresh.' : undefined
           }
@@ -32,14 +47,21 @@ export function FileMenu() {
           }
         >
           <Icon />
-          <span className="truncate">{fileName ?? 'No file'}</span>
+          <div className="flex min-w-0 flex-1 flex-col gap-px leading-tight">
+            <span className="truncate text-sm font-medium">{title}</span>
+            {noFile && (
+              <span className="truncate text-[11px] opacity-80">
+                Notes will not be saved
+              </span>
+            )}
+          </div>
           <ChevronDown className="ml-auto" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="center"
         sideOffset={6}
-        className="w-56 rounded-md p-1"
+        className="w-64 rounded-md p-1"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <DropdownMenuItem

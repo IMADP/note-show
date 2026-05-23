@@ -22,8 +22,15 @@ export type Page = {
   updatedAt: string
 }
 
-export type AppState = {
+export type Folder = {
+  id: string
+  name: string
+  collapsed: boolean
   pages: Page[]
+}
+
+export type AppState = {
+  folders: Folder[]
   mode: 'view' | 'edit'
   editingId: string | null
   draft: { title: string; content: string } | null
@@ -31,19 +38,21 @@ export type AppState = {
   fileHandle: FileSystemFileHandle | null
   fileName: string | null
 
-  /**
-   * Set when a previously-opened file is remembered in IndexedDB but its
-   * permission has lapsed (typical on a fresh browser session). The user
-   * must click to re-grant — call `restoreLastFile()` from a user gesture.
-   */
   restorable: { fileName: string } | null
 
-  addPage: () => string
-  deletePage: (id: string) => void
-  renamePage: (id: string, title: string) => void
-  reorderPages: (activeId: string, overId: string) => void
+  addFolder: () => string
+  deleteFolder: (folderId: string) => void
+  renameFolder: (folderId: string, name: string) => void
+  toggleFolderCollapsed: (folderId: string) => void
+  reorderFolders: (activeId: string, overId: string) => void
 
-  beginEdit: (id: string) => void
+  addPageInFolder: (folderId: string) => string | null
+  commitDndResult: (nextFolders: Folder[]) => void
+
+  deletePage: (pageId: string) => void
+  renamePage: (pageId: string, title: string) => void
+
+  beginEdit: (pageId: string) => void
   cancelEdit: () => void
   saveEdit: () => Promise<void>
   updateDraft: (patch: Partial<{ title: string; content: string }>) => void
@@ -81,16 +90,21 @@ A few things follow from that:
 The flow is short:
 
 1. Open or create a notebook through the file menu at the top of the sidebar.
-2. Click **Add Page** at the bottom of the sidebar to create a page.
-3. Click **Edit**, or pick an existing page and click its **Edit** button.
-4. Write. Hit \`Ctrl+S\` (or \`⌘S\` on macOS) to save. The editor closes and the page renders.
-5. Repeat.
+2. Click **Add Folder** at the bottom of the sidebar to create a folder.
+3. Click **Add Page** inside a folder to create a page.
+4. Click **Edit**, or pick an existing page and click its **Edit** button.
+5. Write. Hit \`Ctrl+S\` (or \`⌘S\` on macOS) to save. The editor closes and the page renders.
+6. Repeat.
 
-The file menu also lets you switch between notebooks. Each notebook is a separate file, so you can keep a work notebook and a personal one without them touching each other.
+The file menu also lets you switch between notebooks. Each notebook is a separate file, so you can keep a work notebook and a personal one without them touching each other. If you close the browser and come back later, the file selector at the top of the sidebar will offer to reopen your previous notebook, right-click the selector to re-grant the browser's file permission and bring everything back.
 
-**Reordering pages.** Drag any page in the sidebar up or down to reorder it. The new order saves to disk immediately, just like every other change. Pages are a flat list, top to bottom, in the order you arrange them.
+**Organizing with folders.** Pages live inside top-level folders. There is no nesting beyond that, on purpose: deep hierarchies become their own organizational problem. Click the chevron on a folder to collapse or expand it. Each folder also has a small **+** that appears on hover, click it to add a new page directly inside that folder.
 
-**Removing a page.** Hover a page in the sidebar and click the trash icon that appears. You will be asked to confirm.
+**Renaming.** Double-click a folder name or a page name in the sidebar to rename it in place. Press Enter to commit, or Escape to back out. Page titles can also be edited from the title field at the top of the page while you are in edit mode.
+
+**Reordering.** Drag a folder up or down to reorder folders. Drag a page within its folder to reorder, or drag it onto another folder (including a collapsed one) to move it across. Every drop saves to disk immediately, just like every other change.
+
+**Removing.** Hover a page or folder in the sidebar and click the trash icon that appears. You will be asked to confirm. Deleting a folder deletes the pages inside it too.
 
 > **A note on browsers.** This app uses the File System Access API, which today means a Chromium-based browser (Chrome, Edge, Arc, Brave, Opera). Firefox and Safari are not supported. If you open it in one of those, the app will refuse to start and tell you why.
 
@@ -102,7 +116,7 @@ The renderer supports the full set of features a working writer needs. The next 
 
 The usual suspects: **bold**, *italic*, ***bold and italic***, ~~struck through~~, and \`inline code\`. You can also link to things, both [external sites like example.com](https://example.com) and other pages within the same notebook by their URL.
 
-Autolinks work too: paste a URL like https://wikipedia.org and it becomes a link. 
+Autolinks work too: paste a URL like https://wikipedia.org and it becomes a link.
 
 ### Headings
 
@@ -193,6 +207,13 @@ type Page = {
   updatedAt: string
 }
 
+type Folder = {
+  id: string
+  name: string
+  collapsed: boolean
+  pages: Page[]
+}
+
 function buildWelcome(): Page {
   const now = new Date().toISOString()
   return {
@@ -217,7 +238,7 @@ def load_notebook(path: Path) -> dict:
 
 def count_pages(path: Path) -> int:
     data = load_notebook(path)
-    return len(data.get("pages", []))
+    return sum(len(f.get("pages", [])) for f in data.get("folders", []))
 
 if __name__ == "__main__":
     target = Path("notebook.json")
@@ -231,10 +252,10 @@ And a chunk of shell, because every guide ends up with one eventually:
 cp notebook.json "notebook.$(date +%Y-%m-%d).bak.json"
 
 # Pretty print to see what is in it.
-jq '.pages | map({title, len: (.content | length)})' notebook.json
+jq '.folders | map({name, pages: (.pages | length)})' notebook.json
 
 # Search across all pages for a word.
-jq -r '.pages[] | select(.content | test("regex")) | .title' notebook.json
+jq -r '.folders[].pages[] | select(.content | test("regex")) | .title' notebook.json
 \`\`\`
 
 Languages with no syntax highlighter registered fall back to plain monospace blocks:
@@ -314,14 +335,21 @@ The notebook on disk is a JSON document with a tiny shape:
 
 \`\`\`json
 {
-  "version": 1,
-  "pages": [
+  "version": 2,
+  "folders": [
     {
-      "id": "0d61c0c2-1b59-4c9c-9ffe-e9c2c3e1c9f1",
-      "title": "Welcome",
-      "content": "# Welcome\\n\\nThis is...",
-      "createdAt": "2026-05-22T10:14:33.221Z",
-      "updatedAt": "2026-05-22T10:14:33.221Z"
+      "id": "4f3e2d1c-0b9a-4c8d-9e7f-1a2b3c4d5e6f",
+      "name": "Welcome",
+      "collapsed": false,
+      "pages": [
+        {
+          "id": "0d61c0c2-1b59-4c9c-9ffe-e9c2c3e1c9f1",
+          "title": "Welcome",
+          "content": "# Welcome\\n\\nThis is...",
+          "createdAt": "2026-05-22T10:14:33.221Z",
+          "updatedAt": "2026-05-22T10:14:33.221Z"
+        }
+      ]
     }
   ]
 }
@@ -329,7 +357,8 @@ The notebook on disk is a JSON document with a tiny shape:
 
 A few things to know:
 
-- **Stable IDs.** Each page has a UUID. The sidebar order is the order in the \`pages\` array. There is no separate sort key, no parent reference, no nesting.
+- **Stable IDs.** Each folder and each page has a UUID. The sidebar order is the array order: folders, top to bottom, and within each folder, pages, top to bottom. There is no separate sort key.
+- **One level of nesting.** Pages live inside folders. Folders are always at the top level. There is no nesting beyond that, on purpose.
 - **Whole file writes.** Every save serializes the entire structure and writes it atomically. There is no diffing.
 - **Forward compatibility.** The renderer refuses to open a file whose \`version\` is higher than it understands. If we ever change the schema, you will see a clear error rather than a corrupted notebook.
 
@@ -337,12 +366,15 @@ For anyone curious, the read and write logic is small enough to fit in your head
 
 ## Keyboard shortcuts
 
-| Context        | Shortcut                  | Action                              |
-|----------------|---------------------------|-------------------------------------|
-| Editing a page | \`Ctrl+S\` / \`⌘S\`           | Save the current draft              |
-| Editing a page | \`Ctrl+Enter\` / \`⌘Enter\`   | Save the current draft (alternate)  |
-| Editing a page | \`Esc\`                     | Cancel (with confirm if dirty)      |
-| Viewing a page | \`Tab\` then space          | Move focus to the Edit button       |
+| Context         | Shortcut                  | Action                              |
+|-----------------|---------------------------|-------------------------------------|
+| Editing a page  | \`Ctrl+S\` / \`⌘S\`           | Save the current draft              |
+| Editing a page  | \`Ctrl+Enter\` / \`⌘Enter\`   | Save the current draft (alternate)  |
+| Editing a page  | \`Esc\`                     | Cancel (with confirm if dirty)      |
+| Viewing a page  | \`Tab\` then space          | Move focus to the Edit button       |
+| Sidebar item    | Double-click              | Rename a folder or page in place    |
+| Inline rename   | \`Enter\`                   | Commit the new name                 |
+| Inline rename   | \`Esc\`                     | Cancel the rename                   |
 
 Most other interactions are click driven by design. There is no command palette, no fuzzy finder, no jump-to-page modal. If you find yourself needing one, the notebook has probably grown beyond what this app wants to be.
 
@@ -387,6 +419,7 @@ The app is feature complete for the original goal. The remaining work is polish:
 - [x] Per page edit and save cycle with confirm on cancel
 - [x] Markdown rendering with GFM, math, and syntax highlighting
 - [x] Doc style accents for headings, tables, blockquotes, and inline code
+- [x] Folders for organizing pages
 
 ## Acknowledgments
 
@@ -396,7 +429,8 @@ note-show is built on a small set of dependencies, each of which deserves a ment
 2. [Zustand](https://github.com/pmndrs/zustand), for being the simplest state library that does the job.
 3. [react-markdown](https://github.com/remarkjs/react-markdown), [remark-gfm](https://github.com/remarkjs/remark-gfm), [remark-math](https://github.com/remarkjs/remark-math), [KaTeX](https://katex.org), and [rehype-highlight](https://github.com/rehypejs/rehype-highlight), which together do the heavy lifting on the rendering side.
 4. [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com), for letting the visual layer come together quickly without locking it into one look.
-5. The File System Access API, which is the entire reason this app is possible without a backend.
+5. [@dnd-kit](https://dndkit.com), for the drag-and-drop on folders and pages.
+6. The File System Access API, which is the entire reason this app is possible without a backend.
 
 That is the whole list. Everything else is plumbing.
 
@@ -418,20 +452,59 @@ function buildWelcomePage(): Page {
   }
 }
 
-const seedPages = (): Page[] => [buildWelcomePage()]
+function buildWelcomeFolder(): Folder {
+  return {
+    id: uuid(),
+    name: 'Notes',
+    collapsed: false,
+    pages: [buildWelcomePage()],
+  }
+}
+
+const seedFolders = (): Folder[] => [buildWelcomeFolder()]
 
 function describeError(err: unknown): string {
   if (err instanceof Error) return err.message
   return String(err)
 }
 
+export type PageLocation = {
+  folderIdx: number
+  pageIdx: number
+  folder: Folder
+  page: Page
+}
+
+export function locatePage(
+  folders: Folder[],
+  pageId: string,
+): PageLocation | null {
+  for (let i = 0; i < folders.length; i++) {
+    const folder = folders[i]
+    for (let j = 0; j < folder.pages.length; j++) {
+      const page = folder.pages[j]
+      if (page.id === pageId) {
+        return { folderIdx: i, pageIdx: j, folder, page }
+      }
+    }
+  }
+  return null
+}
+
+export function firstPageId(folders: Folder[]): string | null {
+  for (const folder of folders) {
+    if (folder.pages.length > 0) return folder.pages[0].id
+  }
+  return null
+}
+
 async function persist(
   handle: FileSystemFileHandle | null,
-  pages: Page[],
+  folders: Folder[],
 ): Promise<void> {
   if (!handle) return
   try {
-    await writeFile(handle, { version: 1, pages })
+    await writeFile(handle, { version: 2, folders })
   } catch (err) {
     console.error('Failed to save notebook:', err)
     toast.error('Save failed', { description: describeError(err) })
@@ -439,7 +512,7 @@ async function persist(
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  pages: seedPages(),
+  folders: seedFolders(),
   mode: 'view',
   editingId: null,
   draft: null,
@@ -447,7 +520,70 @@ export const useAppStore = create<AppState>((set, get) => ({
   fileName: null,
   restorable: null,
 
-  addPage: () => {
+  addFolder: () => {
+    const folder: Folder = {
+      id: uuid(),
+      name: 'New folder',
+      collapsed: false,
+      pages: [],
+    }
+    const nextFolders = [...get().folders, folder]
+    set({ folders: nextFolders })
+    void persist(get().fileHandle, nextFolders)
+    return folder.id
+  },
+
+  deleteFolder: (folderId) => {
+    const state = get()
+    const target = state.folders.find((f) => f.id === folderId)
+    if (!target) return
+    const clearingEdit =
+      state.editingId !== null && target.pages.some((p) => p.id === state.editingId)
+    const nextFolders = state.folders.filter((f) => f.id !== folderId)
+    set({
+      folders: nextFolders,
+      mode: clearingEdit ? 'view' : state.mode,
+      editingId: clearingEdit ? null : state.editingId,
+      draft: clearingEdit ? null : state.draft,
+    })
+    void persist(state.fileHandle, nextFolders)
+  },
+
+  renameFolder: (folderId, name) => {
+    const state = get()
+    const nextFolders = state.folders.map((f) =>
+      f.id === folderId ? { ...f, name } : f,
+    )
+    set({ folders: nextFolders })
+    void persist(state.fileHandle, nextFolders)
+  },
+
+  toggleFolderCollapsed: (folderId) => {
+    const state = get()
+    const nextFolders = state.folders.map((f) =>
+      f.id === folderId ? { ...f, collapsed: !f.collapsed } : f,
+    )
+    set({ folders: nextFolders })
+    void persist(state.fileHandle, nextFolders)
+  },
+
+  reorderFolders: (activeId, overId) => {
+    if (activeId === overId) return
+    const state = get()
+    const from = state.folders.findIndex((f) => f.id === activeId)
+    const to = state.folders.findIndex((f) => f.id === overId)
+    if (from === -1 || to === -1) return
+    const nextFolders = state.folders.slice()
+    const [moved] = nextFolders.splice(from, 1)
+    nextFolders.splice(to, 0, moved)
+    set({ folders: nextFolders })
+    void persist(state.fileHandle, nextFolders)
+  },
+
+  addPageInFolder: (folderId) => {
+    const state = get()
+    const folderIdx = state.folders.findIndex((f) => f.id === folderId)
+    if (folderIdx === -1) return null
     const t = now()
     const page: Page = {
       id: uuid(),
@@ -456,54 +592,63 @@ export const useAppStore = create<AppState>((set, get) => ({
       createdAt: t,
       updatedAt: t,
     }
-    const nextPages = [...get().pages, page]
-    set({ pages: nextPages })
-    void persist(get().fileHandle, nextPages)
+    const nextFolders = state.folders.slice()
+    const folder = nextFolders[folderIdx]
+    nextFolders[folderIdx] = {
+      ...folder,
+      collapsed: false,
+      pages: [...folder.pages, page],
+    }
+    set({ folders: nextFolders })
+    void persist(state.fileHandle, nextFolders)
     return page.id
   },
 
-  deletePage: (id) => {
+  commitDndResult: (nextFolders) => {
+    set({ folders: nextFolders })
+    void persist(get().fileHandle, nextFolders)
+  },
+
+  deletePage: (pageId) => {
     const state = get()
-    const clearingEdit = state.editingId === id
-    const nextPages = state.pages.filter((p) => p.id !== id)
+    const loc = locatePage(state.folders, pageId)
+    if (!loc) return
+    const clearingEdit = state.editingId === pageId
+    const nextFolders = state.folders.slice()
+    const folder = nextFolders[loc.folderIdx]
+    nextFolders[loc.folderIdx] = {
+      ...folder,
+      pages: folder.pages.filter((p) => p.id !== pageId),
+    }
     set({
-      pages: nextPages,
+      folders: nextFolders,
       mode: clearingEdit ? 'view' : state.mode,
       editingId: clearingEdit ? null : state.editingId,
       draft: clearingEdit ? null : state.draft,
     })
-    void persist(state.fileHandle, nextPages)
+    void persist(state.fileHandle, nextFolders)
   },
 
-  renamePage: (id, title) => {
+  renamePage: (pageId, title) => {
     const state = get()
-    const nextPages = state.pages.map((p) =>
-      p.id === id ? { ...p, title, updatedAt: now() } : p,
-    )
-    set({ pages: nextPages })
-    void persist(state.fileHandle, nextPages)
+    const loc = locatePage(state.folders, pageId)
+    if (!loc) return
+    const nextFolders = state.folders.slice()
+    const folder = nextFolders[loc.folderIdx]
+    const nextPages = folder.pages.slice()
+    nextPages[loc.pageIdx] = { ...loc.page, title, updatedAt: now() }
+    nextFolders[loc.folderIdx] = { ...folder, pages: nextPages }
+    set({ folders: nextFolders })
+    void persist(state.fileHandle, nextFolders)
   },
 
-  reorderPages: (activeId, overId) => {
-    if (activeId === overId) return
-    const state = get()
-    const from = state.pages.findIndex((p) => p.id === activeId)
-    const to = state.pages.findIndex((p) => p.id === overId)
-    if (from === -1 || to === -1) return
-    const nextPages = state.pages.slice()
-    const [moved] = nextPages.splice(from, 1)
-    nextPages.splice(to, 0, moved)
-    set({ pages: nextPages })
-    void persist(state.fileHandle, nextPages)
-  },
-
-  beginEdit: (id) => {
-    const page = get().pages.find((p) => p.id === id)
-    if (!page) return
+  beginEdit: (pageId) => {
+    const loc = locatePage(get().folders, pageId)
+    if (!loc) return
     set({
       mode: 'edit',
-      editingId: id,
-      draft: { title: page.title, content: page.content },
+      editingId: pageId,
+      draft: { title: loc.page.title, content: loc.page.content },
     })
   },
 
@@ -512,18 +657,25 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   saveEdit: async () => {
-    const { draft, editingId, pages, fileHandle } = get()
+    const { draft, editingId, folders, fileHandle } = get()
     if (!draft || !editingId) return
+    const loc = locatePage(folders, editingId)
+    if (!loc) return
 
-    const nextPages = pages.map((p) =>
-      p.id === editingId
-        ? { ...p, title: draft.title, content: draft.content, updatedAt: now() }
-        : p,
-    )
+    const nextFolders = folders.slice()
+    const folder = nextFolders[loc.folderIdx]
+    const nextPages = folder.pages.slice()
+    nextPages[loc.pageIdx] = {
+      ...loc.page,
+      title: draft.title,
+      content: draft.content,
+      updatedAt: now(),
+    }
+    nextFolders[loc.folderIdx] = { ...folder, pages: nextPages }
 
     if (fileHandle) {
       try {
-        await writeFile(fileHandle, { version: 1, pages: nextPages })
+        await writeFile(fileHandle, { version: 2, folders: nextFolders })
       } catch (err) {
         console.error('Failed to save notebook:', err)
         toast.error('Save failed', { description: describeError(err) })
@@ -531,7 +683,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     }
 
-    set({ pages: nextPages, mode: 'view', editingId: null, draft: null })
+    set({ folders: nextFolders, mode: 'view', editingId: null, draft: null })
   },
 
   updateDraft: (patch) => {
@@ -553,7 +705,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       fileHandle: result.handle,
       fileName: result.handle.name,
-      pages: result.data.pages,
+      folders: result.data.folders,
       mode: 'view',
       editingId: null,
       draft: null,
@@ -574,10 +726,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
     if (!result) return
 
-    // Seed newly-created files with a Welcome page.
-    const seededPages = [buildWelcomePage()]
+    const seededFolders = [buildWelcomeFolder()]
     try {
-      await writeFile(result.handle, { version: 1, pages: seededPages })
+      await writeFile(result.handle, { version: 2, folders: seededFolders })
     } catch (err) {
       console.error('Failed to seed new file:', err)
       toast.error('Could not seed new file', { description: describeError(err) })
@@ -587,7 +738,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       fileHandle: result.handle,
       fileName: result.handle.name,
-      pages: seededPages,
+      folders: seededFolders,
       mode: 'view',
       editingId: null,
       draft: null,
@@ -598,9 +749,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   tryRestoreLastFile: async () => {
-    // Boot-time: read the stored handle, attempt a silent load if permission
-    // still holds. Otherwise mark `restorable` so the UI can offer a one-click
-    // re-grant. Any failure clears IDB rather than leaving a poisoned entry.
     if (get().fileHandle) return
 
     let stored
@@ -630,14 +778,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       return
     }
 
-    // Already granted — load silently.
     try {
       const file = await stored.handle.getFile()
       const data = parse(await file.text())
       set({
         fileHandle: stored.handle,
         fileName: stored.handle.name,
-        pages: data.pages,
+        folders: data.folders,
         mode: 'view',
         editingId: null,
         draft: null,
@@ -650,7 +797,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   restoreLastFile: async () => {
-    // User-gesture handler — safe to call requestPermission here.
     let stored
     try {
       stored = await loadLastFile()
@@ -684,7 +830,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         fileHandle: stored.handle,
         fileName: stored.handle.name,
-        pages: data.pages,
+        folders: data.folders,
         mode: 'view',
         editingId: null,
         draft: null,
@@ -713,14 +859,16 @@ async function rememberFile(handle: FileSystemFileHandle): Promise<void> {
   try {
     await saveLastFile({ handle, fileName: handle.name })
   } catch (err) {
-    // Non-fatal — the file is open this session; we just won't auto-restore.
     console.error('Failed to persist file handle to IDB:', err)
   }
 }
 
 export function isDraftDirty(state: AppState): boolean {
   if (state.mode !== 'edit' || !state.draft || !state.editingId) return false
-  const page = state.pages.find((p) => p.id === state.editingId)
-  if (!page) return false
-  return state.draft.title !== page.title || state.draft.content !== page.content
+  const loc = locatePage(state.folders, state.editingId)
+  if (!loc) return false
+  return (
+    state.draft.title !== loc.page.title ||
+    state.draft.content !== loc.page.content
+  )
 }

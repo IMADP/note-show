@@ -1,6 +1,6 @@
 import { Navigate, useParams } from 'react-router-dom'
 
-import { useAppStore } from '@/store/use-app-store'
+import { locatePage, useAppStore } from '@/store/use-app-store'
 
 import { PageEdit } from './page-edit'
 import { PageHeader } from './page-header'
@@ -8,7 +8,9 @@ import { PageView } from './page-view'
 
 export function PageRoute() {
   const { id } = useParams<{ id: string }>()
-  const page = useAppStore((s) => s.pages.find((p) => p.id === id))
+  const page = useAppStore((s) =>
+    id ? (locatePage(s.folders, id)?.page ?? null) : null,
+  )
   const mode = useAppStore((s) => s.mode)
   const editingId = useAppStore((s) => s.editingId)
 

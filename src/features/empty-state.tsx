@@ -1,11 +1,11 @@
 import { Navigate } from 'react-router-dom'
 
-import { useAppStore } from '@/store/use-app-store'
+import { firstPageId, useAppStore } from '@/store/use-app-store'
 
 export function EmptyState() {
-  const firstPageId = useAppStore((s) => s.pages[0]?.id)
-  if (firstPageId) {
-    return <Navigate to={`/page/${firstPageId}`} replace />
+  const firstId = useAppStore((s) => firstPageId(s.folders))
+  if (firstId) {
+    return <Navigate to={`/page/${firstId}`} replace />
   }
   return (
     <div className="flex h-full w-full items-center justify-center p-8">
