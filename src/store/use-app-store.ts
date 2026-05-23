@@ -65,12 +65,16 @@ A few things follow from that:
 The flow is short:
 
 1. Open or create a notebook through the file menu at the top of the sidebar.
-2. Click **New page** to add a page.
+2. Click **Add Page** at the bottom of the sidebar to create a page.
 3. Click **Edit**, or pick an existing page and click its **Edit** button.
 4. Write. Hit \`Ctrl+S\` (or \`⌘S\` on macOS) to save. The editor closes and the page renders.
 5. Repeat.
 
 The file menu also lets you switch between notebooks. Each notebook is a separate file, so you can keep a work notebook and a personal one without them touching each other.
+
+**Reordering pages.** Drag any page in the sidebar up or down to reorder it. The new order saves to disk immediately, just like every other change. Pages are a flat list, top to bottom, in the order you arrange them.
+
+**Removing a page.** Hover a page in the sidebar and click the trash icon that appears. You will be asked to confirm.
 
 > **A note on browsers.** This app uses the File System Access API, which today means a Chromium-based browser (Chrome, Edge, Arc, Brave, Opera). Firefox and Safari are not supported. If you open it in one of those, the app will refuse to start and tell you why.
 
@@ -86,7 +90,7 @@ Autolinks work too: paste a URL like https://wikipedia.org and it becomes a link
 
 ### Headings
 
-There are six heading levels, but in practice you will rarely need more than three. The renderer styles \`<h1>\` with a thick accent underline, and \`<h2>\` in the accent color with a thin gray rule beneath. \`<h3>\` is plain, just a slightly heavier body text. The visual hierarchy is intentional: a document with three or four \`<h2>\` sections and a few \`<h3>\` subsections feels readable. A document with eight nested \`<h6>\` does not.
+There are six heading levels, but in practice you will rarely need more than three. The renderer styles \`<h1>\` as the page-opener in bold display weight, \`<h2>\` as a section break with a thin rule beneath, and \`<h3>\` as a slightly smaller subsection. The visual hierarchy is intentional: a document with three or four \`<h2>\` sections and a few \`<h3>\` subsections feels readable. A document with eight nested \`<h6>\` does not.
 
 ### Lists
 
@@ -367,10 +371,6 @@ The app is feature complete for the original goal. The remaining work is polish:
 - [x] Per page edit and save cycle with confirm on cancel
 - [x] Markdown rendering with GFM, math, and syntax highlighting
 - [x] Doc style accents for headings, tables, blockquotes, and inline code
-- [ ] \`beforeunload\` warning when there is an unsaved draft
-- [ ] Lazy load KaTeX and highlight.js to shrink the initial bundle
-- [ ] Lazy load the editor route as well
-- [ ] Optional: a "recent files" list in the file menu
 
 ## Acknowledgments
 
@@ -388,7 +388,7 @@ That is the whole list. Everything else is plumbing.
 
 ## Closing
 
-You have read to the end of the welcome page. Thank you for indulging the long version. Now go ahead and delete this page (hover it in the sidebar) and start writing your own.
+You have read to the end of the welcome page. Thank you for indulging the long version. Now go ahead and delete this page (hover it in the sidebar and click the trash icon) and start writing your own.
 `
 
 function buildWelcomePage(): Page {
