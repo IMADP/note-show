@@ -100,7 +100,7 @@ The file menu also lets you switch between notebooks. Each notebook is a separat
 
 **Organizing with folders.** Pages live inside top-level folders. There is no nesting beyond that, on purpose: deep hierarchies become their own organizational problem. Click the chevron on a folder to collapse or expand it. Each folder also has a small **+** that appears on hover, click it to add a new page directly inside that folder.
 
-**Renaming.** Double-click a folder name or a page name in the sidebar to rename it in place. Press Enter to commit, or Escape to back out. Page titles can also be edited from the title field at the top of the page while you are in edit mode.
+**Renaming.** Double-click a page name in the sidebar to rename it in place, or right-click a folder name to do the same. Press Enter to commit, or Escape to back out. Page titles can also be edited from the title field at the top of the page while you are in edit mode.
 
 **Reordering.** Drag a folder up or down to reorder folders. Drag a page within its folder to reorder, or drag it onto another folder (including a collapsed one) to move it across. Every drop saves to disk immediately, just like every other change.
 
@@ -185,7 +185,8 @@ Tables look like this:
 | \`Esc\`            | Cancel the current edit             |
 | Click sidebar    | Switch to another page              |
 | Right-click page | Open that page in edit mode         |
-| Double-click     | Rename a page or folder in place    |
+| Right-click folder | Rename a folder in place          |
+| Double-click page | Rename a page in place             |
 
 Alignment is supported with the usual \`:---\`, \`:---:\`, \`---:\` markers:
 

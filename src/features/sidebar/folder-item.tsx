@@ -154,7 +154,8 @@ export function FolderItem({ folder }: { folder: Folder }) {
         ) : (
           <div
             onClick={handleHeaderClick}
-            onDoubleClick={(e) => {
+            onContextMenu={(e) => {
+              e.preventDefault()
               e.stopPropagation()
               startRename()
             }}
