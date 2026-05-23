@@ -47,7 +47,12 @@ export function PageEdit() {
         onChange={(e) => updateDraft({ content: e.target.value })}
         onKeyDown={handleKeyDown}
         spellCheck={false}
-        className="font-mono flex-1 resize-none text-sm"
+        className="flex-1 resize-none text-[13.5px] leading-relaxed"
+        style={{
+          fontFamily:
+            "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+          fontFeatureSettings: "'calt', 'liga'",
+        }}
       />
     </div>
   )

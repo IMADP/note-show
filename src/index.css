@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/700.css";
+@import "@fontsource/jetbrains-mono/400-italic.css";
 @import "katex/dist/katex.min.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -184,96 +188,186 @@
 }
 
 /*
- * Document-style accents for rendered markdown.
- * Inspired by the sample.html reference: corporate blue accent on h1/h2
- * underlines and links, bordered tables with gray header rows, blockquotes
- * styled as left-bordered callouts, and rounded inline-code chips.
+ * shadcn/ui typography conventions applied to rendered markdown.
+ * Reference: https://ui.shadcn.com/docs/components/typography
  *
- * Selectors use `.prose.note-prose` to outrank the @tailwindcss/typography
- * plugin's `:where()`-wrapped defaults.
+ *   h1 — text-4xl, extrabold, tracking-tight
+ *   h2 — text-3xl, semibold, tracking-tight, border-b pb-2
+ *   h3 — text-2xl, semibold, tracking-tight
+ *   h4 — text-xl, semibold, tracking-tight
+ *   p  — leading-7
+ *   blockquote — border-l-2 pl-6 italic
+ *   code (inline) — bg-muted, semibold, rounded
+ *   table — bordered cells
+ *
+ * Selectors use `.prose.note-prose` to outrank @tailwindcss/typography's
+ * `:where()`-wrapped defaults.
  */
-.note-prose {
-  --doc-accent: oklch(0.55 0.14 245);
-  --doc-accent-soft: oklch(0.965 0.025 245);
-  --doc-rule: oklch(0.88 0 0);
-  --doc-rule-strong: oklch(0.78 0 0);
-  --doc-th-bg: oklch(0.93 0 0);
-  --doc-code-bg: oklch(0.96 0 0);
+
+.note-prose-surface {
+  --prose-body: oklch(0.36 0 0);
+  --prose-quote-bg: oklch(0.97 0.013 240);
+  --prose-quote-bar: oklch(0.72 0.07 240);
+  background: var(--background);
+  color: var(--prose-body);
 }
 
-.dark .note-prose {
-  --doc-accent: oklch(0.72 0.14 245);
-  --doc-accent-soft: oklch(0.27 0.05 245);
-  --doc-rule: oklch(0.32 0 0);
-  --doc-rule-strong: oklch(0.42 0 0);
-  --doc-th-bg: oklch(0.26 0 0);
-  --doc-code-bg: oklch(0.24 0 0);
+.dark .note-prose-surface {
+  --prose-body: oklch(0.78 0 0);
+  --prose-quote-bg: oklch(0.245 0.018 240);
+  --prose-quote-bar: oklch(0.58 0.08 240);
 }
 
+.prose.note-prose {
+  font-family: 'Geist Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  font-feature-settings: 'kern', 'liga', 'calt';
+  font-size: 1rem;
+  line-height: 1.75; /* leading-7 ≈ 1.75rem on 1rem text */
+  color: var(--prose-body);
+  max-width: none;
+}
+
+.prose.note-prose ::selection {
+  background: color-mix(in oklch, var(--primary) 25%, transparent);
+  color: inherit;
+}
+
+/* PARAGRAPHS — leading-7 [&:not(:first-child)]:mt-6 */
+.prose.note-prose p {
+  line-height: 1.75;
+  margin-top: 0;
+  margin-bottom: 0;
+  text-wrap: pretty;
+}
+
+.prose.note-prose p:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+/* HEADINGS */
+.prose.note-prose h1,
+.prose.note-prose h2,
+.prose.note-prose h3,
+.prose.note-prose h4,
+.prose.note-prose h5,
+.prose.note-prose h6 {
+  font-family: inherit;
+  color: var(--foreground);
+  text-wrap: balance;
+  letter-spacing: -0.025em; /* tracking-tight */
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* h1 — text-4xl font-extrabold (shrunk from 2.25rem) */
 .prose.note-prose h1 {
-  font-size: 1.75em;
-  border-bottom: 3px solid var(--doc-accent);
-  padding-bottom: 0.3em;
-  margin-bottom: 0.5em;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 2rem;
+  line-height: 1.1;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
 }
 
+/* h2 — text-3xl font-semibold border-b pb-2 first:mt-0 */
 .prose.note-prose h2 {
-  color: var(--doc-accent);
-  border-bottom: 1px solid var(--doc-rule);
-  padding-bottom: 0.25em;
-  margin-top: 2em;
-  margin-bottom: 0.75em;
+  font-size: 1.875rem;
+  line-height: 1.2;
   font-weight: 600;
+  margin-top: 2.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
+.prose.note-prose h2:first-child {
+  margin-top: 0;
+}
+
+/* h3 — text-2xl font-semibold */
 .prose.note-prose h3 {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+  font-size: 1.5rem;
+  line-height: 1.25;
   font-weight: 600;
+  margin-top: 2rem;
 }
 
+/* h4 — text-xl font-semibold */
+.prose.note-prose h4 {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 600;
+  margin-top: 1.75rem;
+}
+
+.prose.note-prose h5,
+.prose.note-prose h6 {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  color: var(--muted-foreground);
+}
+
+/* Make the first heading-like child sit flush with the top */
+.prose.note-prose > :first-child {
+  margin-top: 0;
+}
+
+/* Tighten spacing between a heading and its following content */
+.prose.note-prose :is(h1, h2, h3, h4, h5, h6) + * {
+  margin-top: 0.75rem;
+}
+
+/* LINKS — font-medium underline underline-offset-4 */
 .prose.note-prose a {
-  color: var(--doc-accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
+  color: inherit;
   font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-thickness 0.15s ease;
 }
 
 .prose.note-prose a:hover {
   text-decoration-thickness: 2px;
 }
 
-.prose.note-prose hr {
-  border: none;
-  border-top: 1px solid var(--doc-rule);
-  margin: 1.75em 0;
+.prose.note-prose em {
+  font-style: italic;
 }
 
+.prose.note-prose strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+/* HORIZONTAL RULE — a quiet themed line */
+.prose.note-prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* BLOCKQUOTE — subtle slate-blue tint, italic */
 .prose.note-prose blockquote {
-  background: var(--doc-accent-soft);
-  border-left: 4px solid var(--doc-accent);
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border-left: 3px solid var(--prose-quote-bar);
   border-radius: 0 0.375rem 0.375rem 0;
-  padding: 0.85em 1.1em;
-  margin: 1.25em 0;
-  font-style: normal;
-  font-weight: 400;
+  background: var(--prose-quote-bg);
+  font-style: italic;
   color: inherit;
   quotes: none;
 }
 
 .prose.note-prose blockquote p {
-  margin: 0.4em 0;
+  margin: 0;
 }
 
-.prose.note-prose blockquote p:first-of-type {
-  margin-top: 0;
-}
-
-.prose.note-prose blockquote p:last-of-type {
-  margin-bottom: 0;
+.prose.note-prose blockquote p + p {
+  margin-top: 0.75rem;
 }
 
 .prose.note-prose blockquote p::before,
@@ -281,41 +375,104 @@
   content: none;
 }
 
+/* LISTS — my-6 ml-6 list-disc [&>li]:mt-2 */
+.prose.note-prose ul,
+.prose.note-prose ol {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+  padding-left: 0;
+}
+
+.prose.note-prose ul {
+  list-style: disc;
+}
+
+.prose.note-prose ol {
+  list-style: decimal;
+}
+
+.prose.note-prose li {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+.prose.note-prose li::marker {
+  color: var(--muted-foreground);
+}
+
+.prose.note-prose ol > li::marker {
+  font-variant-numeric: tabular-nums;
+}
+
+.prose.note-prose li > p {
+  margin: 0;
+}
+
+.prose.note-prose li > p + p {
+  margin-top: 0.5rem;
+}
+
+.prose.note-prose li > ul,
+.prose.note-prose li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.prose.note-prose li input[type='checkbox'] {
+  accent-color: var(--primary);
+  margin-right: 0.5rem;
+  transform: translateY(-1px);
+}
+
+/* TABLES — my-6 w-full; bordered cells */
 .prose.note-prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1em 0 1.5em;
-  font-size: 0.92em;
-  overflow: hidden;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .prose.note-prose thead {
   border-bottom: none;
 }
 
+.prose.note-prose tr {
+  border-top: 1px solid var(--border);
+}
+
+.prose.note-prose tr:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
 .prose.note-prose th {
-  background: var(--doc-th-bg);
+  font-weight: 700;
   text-align: left;
-  font-weight: 600;
-  border: 1px solid var(--doc-rule-strong);
-  padding: 0.55em 0.85em;
-  vertical-align: top;
+  padding: 0.5rem 1rem;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  background: none;
 }
 
 .prose.note-prose td {
-  border: 1px solid var(--doc-rule-strong);
-  padding: 0.55em 0.85em;
-  vertical-align: top;
+  padding: 0.5rem 1rem;
+  vertical-align: middle;
+  border: 1px solid var(--border);
 }
 
+/* INLINE CODE — relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold */
 .prose.note-prose :not(pre) > code {
-  background: var(--doc-code-bg);
-  padding: 0.1em 0.4em;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.9em;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
+  background: var(--muted);
+  padding: 0.2rem 0.3rem;
+  border-radius: calc(var(--radius) - 4px);
+  font-weight: 600;
+  font-size: 0.875em;
   color: inherit;
-  border: 1px solid color-mix(in oklch, var(--doc-rule) 60%, transparent);
+  border: none;
 }
 
 .prose.note-prose :not(pre) > code::before,
@@ -323,30 +480,19 @@
   content: none;
 }
 
-.prose.note-prose strong {
-  font-weight: 600;
+/* IMAGES */
+.prose.note-prose img {
+  border-radius: var(--radius);
+  margin: 1.5rem auto;
 }
 
-.prose.note-prose ul,
-.prose.note-prose ol {
-  margin-top: 0.75em;
-  margin-bottom: 0.75em;
+/* KATEX */
+.prose.note-prose .katex {
+  font-size: 1em;
 }
 
-.prose.note-prose li {
-  margin-top: 0.15em;
-  margin-bottom: 0.15em;
-}
-
-.prose.note-prose li > p {
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
-}
-
-.prose.note-prose li > ul,
-.prose.note-prose li > ol {
-  margin-top: 0.2em;
-  margin-bottom: 0.2em;
+.prose.note-prose .katex-display {
+  margin: 1.5rem 0;
 }
 
 /*
@@ -370,18 +516,19 @@
  */
 .prose.note-prose .code-block {
   position: relative;
-  margin: 1.25em 0;
+  margin: 1.5em 0;
 }
 
 .prose.note-prose .code-block pre.shiki {
   margin: 0;
-  padding: 0.85rem 0;
-  border: 1px solid var(--doc-rule);
+  padding: 1rem 0;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   background-color: var(--shiki-light-bg) !important;
   overflow-x: auto;
-  font-size: 0.85em;
-  line-height: 1.55;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82em;
+  line-height: 1.6;
   color: var(--shiki-light) !important;
 }
 
@@ -400,6 +547,7 @@
   font-weight: 400;
   font-size: 1em;
   color: inherit;
+  font-family: inherit;
 }
 
 .prose.note-prose .code-block pre.shiki code::before,
@@ -421,8 +569,8 @@
   padding-right: 1rem;
   margin-right: 0.85rem;
   text-align: right;
-  color: color-mix(in oklch, var(--shiki-light) 35%, transparent);
-  border-right: 1px solid var(--doc-rule);
+  color: color-mix(in oklch, var(--shiki-light) 32%, transparent);
+  border-right: 1px solid var(--border);
   user-select: none;
   font-variant-numeric: tabular-nums;
 }
@@ -455,9 +603,9 @@
   width: 1.85rem;
   height: 1.85rem;
   padding: 0;
-  background: color-mix(in oklch, var(--background) 85%, transparent);
-  color: var(--muted-foreground);
-  border: 1px solid var(--doc-rule);
+  background: color-mix(in oklch, var(--paper, var(--background)) 85%, transparent);
+  color: var(--ink-soft, var(--muted-foreground));
+  border: 1px solid var(--rule, var(--border));
   border-radius: 0.375rem;
   cursor: pointer;
   opacity: 0;
@@ -470,12 +618,12 @@
 }
 
 .code-block-copy:hover {
-  background: var(--background);
-  color: var(--foreground);
-  border-color: var(--doc-rule-strong);
+  background: var(--paper, var(--background));
+  color: var(--ink, var(--foreground));
+  border-color: var(--rule-strong, var(--border));
 }
 
 .code-block-copy:focus-visible {
-  outline: 2px solid var(--doc-accent);
+  outline: 2px solid var(--accent, var(--ring));
   outline-offset: 1px;
 }

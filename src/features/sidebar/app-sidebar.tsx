@@ -31,7 +31,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="p-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <FileMenu />
@@ -46,6 +46,7 @@ export function AppSidebar() {
             title="New page"
             aria-label="New page"
             onClick={handleAdd}
+            className="right-[13px] cursor-pointer"
           >
             <Plus />
           </SidebarGroupAction>

@@ -3,8 +3,8 @@ import type { Page } from '@/store/use-app-store'
 
 export function PageView({ page }: { page: Page }) {
   return (
-    <div className="flex-1 overflow-y-scroll p-6">
-      <article className="note-prose prose prose-neutral dark:prose-invert max-w-none">
+    <div className="note-prose-surface flex-1 overflow-y-scroll">
+      <article className="note-prose prose prose-neutral dark:prose-invert relative w-full max-w-none px-8 py-10">
         <Markdown source={page.content} />
       </article>
     </div>

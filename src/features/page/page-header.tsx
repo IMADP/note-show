@@ -20,7 +20,7 @@ function ThemeToggle() {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          size="icon-sm"
+          size="icon"
           variant="outline"
           onClick={toggleTheme}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -65,9 +65,9 @@ export function PageHeader({ page }: { page: Page }) {
   if (!isEditingThis) {
     return (
       <div className="flex items-center justify-between h-[49px] border-b px-6">
-        <h1 className="text-base font-medium">{page.title || 'Untitled'}</h1>
+        <h1 className="text-lg font-medium">{page.title || 'Untitled'}</h1>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => beginEdit(page.id)}>
+          <Button variant="outline" onClick={() => beginEdit(page.id)}>
             <Pencil />
             Edit
           </Button>
@@ -95,13 +95,13 @@ export function PageHeader({ page }: { page: Page }) {
         className="max-w-md text-base font-medium"
       />
       <div className="flex items-center gap-2">
-        <Button size="sm" variant="outline" onClick={handleCancel}>
+        <Button variant="outline" onClick={handleCancel}>
           <X />
           Cancel
         </Button>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button size="sm" onClick={() => void saveEdit()}>
+            <Button onClick={() => void saveEdit()}>
               <Save />
               Save
             </Button>

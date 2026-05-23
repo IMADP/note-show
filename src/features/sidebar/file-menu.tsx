@@ -25,9 +25,10 @@ export function FileMenu() {
             noFile ? 'No file open — changes will be lost on refresh.' : undefined
           }
           className={
-            noFile
+            'h-[48px] cursor-pointer rounded-none px-4 ' +
+            (noFile
               ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 hover:text-amber-900 data-[state=open]:bg-amber-200 data-[state=open]:text-amber-900 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-900/60 dark:hover:text-amber-100 dark:data-[state=open]:bg-amber-900/60 dark:data-[state=open]:text-amber-100'
-              : 'data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+              : 'data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground')
           }
         >
           <Icon />
@@ -35,14 +36,24 @@ export function FileMenu() {
           <ChevronDown className="ml-auto" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuItem onSelect={() => void openFile()}>
+      <DropdownMenuContent
+        align="center"
+        sideOffset={6}
+        className="w-56 rounded-md p-1"
+      >
+        <DropdownMenuItem
+          onSelect={() => void openFile()}
+          className="cursor-pointer rounded-sm px-3 py-3 text-sm focus:bg-neutral-200 dark:focus:bg-neutral-700"
+        >
           <FolderOpen />
-          Open File…
+          Open File
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => void createFile()}>
+        <DropdownMenuItem
+          onSelect={() => void createFile()}
+          className="cursor-pointer rounded-sm px-3 py-3 text-sm focus:bg-neutral-200 dark:focus:bg-neutral-700"
+        >
           <FilePlus />
-          New File…
+          New File
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
