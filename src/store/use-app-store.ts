@@ -445,7 +445,7 @@ function buildWelcomePage(): Page {
   const t = now()
   return {
     id: uuid(),
-    title: 'Welcome',
+    title: 'Overview',
     content: WELCOME_CONTENT,
     createdAt: t,
     updatedAt: t,
