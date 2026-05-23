@@ -63,7 +63,7 @@ export function PageListItem({ page }: { page: Page }) {
         isActive={isActive}
         onClick={handleClick}
         className={cn(
-          'cursor-pointer text-base',
+          'cursor-pointer pl-3 text-base',
           isActive &&
             'bg-primary/10 text-foreground font-medium hover:bg-primary/15 data-[active=true]:bg-primary/10 data-[active=true]:text-foreground',
         )}
@@ -74,7 +74,7 @@ export function PageListItem({ page }: { page: Page }) {
         showOnHover
         aria-label="Delete page"
         title="Delete page"
-        className="cursor-pointer hover:bg-destructive/10 hover:text-destructive"
+        className="cursor-pointer peer-data-[size=lg]/menu-button:top-3.5 hover:bg-destructive/10 hover:text-destructive"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
