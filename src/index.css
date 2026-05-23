@@ -223,7 +223,7 @@
     'Segoe UI', sans-serif;
   font-feature-settings: 'kern', 'liga', 'calt';
   font-size: 1rem;
-  line-height: 1.75; /* leading-7 ≈ 1.75rem on 1rem text */
+  line-height: 1.6;
   color: var(--prose-body);
   max-width: none;
 }
@@ -235,7 +235,7 @@
 
 /* PARAGRAPHS — leading-7 [&:not(:first-child)]:mt-6 */
 .prose.note-prose p {
-  line-height: 1.75;
+  line-height: 1.6;
   margin-top: 0;
   margin-bottom: 0;
   text-wrap: pretty;
