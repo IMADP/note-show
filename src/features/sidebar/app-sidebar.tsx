@@ -7,7 +7,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -42,7 +41,6 @@ export function AppSidebar() {
       <SidebarSeparator className="mx-0" />
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Pages</SidebarGroupLabel>
           <SidebarGroupContent>
             <PageList />
           </SidebarGroupContent>
