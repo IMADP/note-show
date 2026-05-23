@@ -8,6 +8,10 @@ interface FileSystemWritableFileStream extends WritableStream {
   close(): Promise<void>
 }
 
+interface FileSystemHandlePermissionDescriptor {
+  mode?: 'read' | 'readwrite'
+}
+
 interface FileSystemFileHandle {
   readonly kind: 'file'
   readonly name: string
@@ -15,6 +19,12 @@ interface FileSystemFileHandle {
   createWritable(options?: {
     keepExistingData?: boolean
   }): Promise<FileSystemWritableFileStream>
+  queryPermission(
+    descriptor?: FileSystemHandlePermissionDescriptor,
+  ): Promise<PermissionState>
+  requestPermission(
+    descriptor?: FileSystemHandlePermissionDescriptor,
+  ): Promise<PermissionState>
 }
 
 interface FilePickerAcceptType {

@@ -7,6 +7,12 @@ import {
   pickFileToOpen,
   writeFile,
 } from '@/lib/file-io'
+import {
+  clearLastFile,
+  loadLastFile,
+  saveLastFile,
+} from '@/lib/file-store'
+import { parse } from '@/lib/storage'
 
 export type Page = {
   id: string
@@ -25,6 +31,13 @@ export type AppState = {
   fileHandle: FileSystemFileHandle | null
   fileName: string | null
 
+  /**
+   * Set when a previously-opened file is remembered in IndexedDB but its
+   * permission has lapsed (typical on a fresh browser session). The user
+   * must click to re-grant — call `restoreLastFile()` from a user gesture.
+   */
+  restorable: { fileName: string } | null
+
   addPage: () => string
   deletePage: (id: string) => void
   renamePage: (id: string, title: string) => void
@@ -37,6 +50,9 @@ export type AppState = {
 
   openFile: () => Promise<void>
   createFile: () => Promise<void>
+  tryRestoreLastFile: () => Promise<void>
+  restoreLastFile: () => Promise<void>
+  dismissRestore: () => Promise<void>
 }
 
 const now = () => new Date().toISOString()
@@ -429,6 +445,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   draft: null,
   fileHandle: null,
   fileName: null,
+  restorable: null,
 
   addPage: () => {
     const t = now()
@@ -540,7 +557,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       mode: 'view',
       editingId: null,
       draft: null,
+      restorable: null,
     })
+    void rememberFile(result.handle)
     toast.success(`Opened ${result.handle.name}`)
   },
 
@@ -572,10 +591,132 @@ export const useAppStore = create<AppState>((set, get) => ({
       mode: 'view',
       editingId: null,
       draft: null,
+      restorable: null,
     })
+    void rememberFile(result.handle)
     toast.success(`Created ${result.handle.name}`)
   },
+
+  tryRestoreLastFile: async () => {
+    // Boot-time: read the stored handle, attempt a silent load if permission
+    // still holds. Otherwise mark `restorable` so the UI can offer a one-click
+    // re-grant. Any failure clears IDB rather than leaving a poisoned entry.
+    if (get().fileHandle) return
+
+    let stored
+    try {
+      stored = await loadLastFile()
+    } catch (err) {
+      console.error('Failed to read last-file from IDB:', err)
+      return
+    }
+    if (!stored) return
+
+    let perm: PermissionState
+    try {
+      perm = await stored.handle.queryPermission({ mode: 'readwrite' })
+    } catch (err) {
+      console.error('queryPermission failed:', err)
+      void clearLastFile()
+      return
+    }
+
+    if (perm === 'denied') {
+      void clearLastFile()
+      return
+    }
+    if (perm !== 'granted') {
+      set({ restorable: { fileName: stored.fileName } })
+      return
+    }
+
+    // Already granted — load silently.
+    try {
+      const file = await stored.handle.getFile()
+      const data = parse(await file.text())
+      set({
+        fileHandle: stored.handle,
+        fileName: stored.handle.name,
+        pages: data.pages,
+        mode: 'view',
+        editingId: null,
+        draft: null,
+        restorable: null,
+      })
+    } catch (err) {
+      console.error('Failed to silent-restore last file:', err)
+      void clearLastFile()
+    }
+  },
+
+  restoreLastFile: async () => {
+    // User-gesture handler — safe to call requestPermission here.
+    let stored
+    try {
+      stored = await loadLastFile()
+    } catch (err) {
+      console.error('Failed to read last-file from IDB:', err)
+      toast.error('Could not reopen file', { description: describeError(err) })
+      return
+    }
+    if (!stored) {
+      set({ restorable: null })
+      return
+    }
+
+    let perm: PermissionState
+    try {
+      perm = await stored.handle.requestPermission({ mode: 'readwrite' })
+    } catch (err) {
+      console.error('requestPermission failed:', err)
+      toast.error('Could not reopen file', { description: describeError(err) })
+      return
+    }
+
+    if (perm !== 'granted') {
+      toast.error('Permission required to reopen the file.')
+      return
+    }
+
+    try {
+      const file = await stored.handle.getFile()
+      const data = parse(await file.text())
+      set({
+        fileHandle: stored.handle,
+        fileName: stored.handle.name,
+        pages: data.pages,
+        mode: 'view',
+        editingId: null,
+        draft: null,
+        restorable: null,
+      })
+      toast.success(`Reopened ${stored.handle.name}`)
+    } catch (err) {
+      console.error('Failed to load restored file:', err)
+      toast.error('Could not read file', { description: describeError(err) })
+      void clearLastFile()
+      set({ restorable: null })
+    }
+  },
+
+  dismissRestore: async () => {
+    set({ restorable: null })
+    try {
+      await clearLastFile()
+    } catch (err) {
+      console.error('Failed to clear last-file from IDB:', err)
+    }
+  },
 }))
+
+async function rememberFile(handle: FileSystemFileHandle): Promise<void> {
+  try {
+    await saveLastFile({ handle, fileName: handle.name })
+  } catch (err) {
+    // Non-fatal — the file is open this session; we just won't auto-restore.
+    console.error('Failed to persist file handle to IDB:', err)
+  }
+}
 
 export function isDraftDirty(state: AppState): boolean {
   if (state.mode !== 'edit' || !state.draft || !state.editingId) return false

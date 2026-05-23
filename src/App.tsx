@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -10,10 +11,17 @@ import { PageRoute } from '@/features/page/page-route'
 import { AppSidebar } from '@/features/sidebar/app-sidebar'
 import { isFileSystemAccessSupported } from '@/lib/file-io'
 import { useGlobalShortcuts, useUnsavedGuard } from '@/lib/keyboard'
+import { useAppStore } from '@/store/use-app-store'
 
 function App() {
   useGlobalShortcuts()
   useUnsavedGuard()
+
+  const tryRestoreLastFile = useAppStore((s) => s.tryRestoreLastFile)
+  useEffect(() => {
+    if (!isFileSystemAccessSupported()) return
+    void tryRestoreLastFile()
+  }, [tryRestoreLastFile])
 
   if (!isFileSystemAccessSupported()) {
     return <BrowserGate />

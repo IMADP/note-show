@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { History, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import {
@@ -13,6 +13,11 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useAppStore } from '@/store/use-app-store'
 
 import { FileMenu } from './file-menu'
@@ -22,6 +27,8 @@ export function AppSidebar() {
   const navigate = useNavigate()
   const addPage = useAppStore((s) => s.addPage)
   const beginEdit = useAppStore((s) => s.beginEdit)
+  const restorable = useAppStore((s) => s.restorable)
+  const restoreLastFile = useAppStore((s) => s.restoreLastFile)
 
   const handleAdd = () => {
     const id = addPage()
@@ -32,11 +39,30 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-0">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <FileMenu />
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex w-full items-stretch">
+          <SidebarMenu className="min-w-0 flex-1">
+            <SidebarMenuItem>
+              <FileMenu />
+            </SidebarMenuItem>
+          </SidebarMenu>
+          {restorable && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => void restoreLastFile()}
+                  aria-label={`Reopen ${restorable.fileName}`}
+                  className="flex h-[48px] w-12 shrink-0 cursor-pointer items-center justify-center border-l text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <History className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <span>Reopen {restorable.fileName}</span>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </SidebarHeader>
       <SidebarSeparator className="mx-0" />
       <SidebarContent>
