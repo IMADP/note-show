@@ -435,8 +435,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-.prose.note-prose thead {
-  border-bottom: none;
+.prose.note-prose thead,
+.prose.note-prose tfoot {
+  background: var(--muted);
 }
 
 .prose.note-prose tr {
@@ -453,13 +454,17 @@
   padding: 0.5rem 1rem;
   vertical-align: middle;
   border: 1px solid var(--border);
-  background: none;
 }
 
 .prose.note-prose td {
   padding: 0.5rem 1rem;
   vertical-align: middle;
   border: 1px solid var(--border);
+}
+
+.prose.note-prose tfoot td,
+.prose.note-prose tfoot th {
+  font-weight: 600;
 }
 
 /* INLINE CODE — relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold */
