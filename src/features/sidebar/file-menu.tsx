@@ -40,6 +40,7 @@ export function FileMenu() {
         align="center"
         sideOffset={6}
         className="w-56 rounded-md p-1"
+        onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <DropdownMenuItem
           onSelect={() => void openFile()}
