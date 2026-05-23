@@ -79,7 +79,7 @@ export function PageListItem({ page }: { page: Page }) {
       className={cn(isDragging && 'z-10 opacity-70')}
     >
       <SidebarMenuButton
-        size="lg"
+        size="md"
         isActive={isActive}
         onClick={handleClick}
         {...attributes}
@@ -96,7 +96,7 @@ export function PageListItem({ page }: { page: Page }) {
         showOnHover
         aria-label="Delete page"
         title="Delete page"
-        className="cursor-pointer peer-data-[size=lg]/menu-button:top-3.5 hover:bg-destructive/10 hover:text-destructive"
+        className="cursor-pointer hover:bg-destructive/10 hover:text-destructive"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
