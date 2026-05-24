@@ -221,7 +221,7 @@ export function FolderList() {
   if (renderedFolders.length === 0) {
     return (
       <div className="text-muted-foreground px-3 py-2 text-xs">
-        No folders yet. Click <span className="font-medium">Add Folder</span> below to get started.
+        Click <span className="font-medium">Add Folder</span> below to get started.
       </div>
     )
   }

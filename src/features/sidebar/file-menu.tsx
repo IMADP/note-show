@@ -19,11 +19,7 @@ export function FileMenu() {
   const noFile = !fileName
   const Icon = noFile ? AlertTriangle : FileText
 
-  const title = noFile
-    ? restorable
-      ? `Right click to load '${restorable.fileName}'`
-      : 'No File Selected'
-    : fileName
+  const title = noFile ? 'No File Selected' : fileName
 
   const handleContextMenu = (e: React.MouseEvent) => {
     if (!restorable) return
@@ -51,7 +47,9 @@ export function FileMenu() {
             <span className="truncate text-sm font-medium">{title}</span>
             {noFile && (
               <span className="truncate text-[11px] opacity-80">
-                Notes will not be saved
+                {restorable
+                  ? `Right-click to load '${restorable.fileName}'`
+                  : 'Notes will not be saved'}
               </span>
             )}
           </div>

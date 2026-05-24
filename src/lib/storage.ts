@@ -37,12 +37,17 @@ export function parse(raw: string): FileFormat {
   }
 
   const version = obj.version
-  if (typeof version === 'number' && version > CURRENT_VERSION) {
+  if (typeof version !== 'number') {
+    throw new Error(
+      'This file does not appear to be a Note Show notebook.',
+    )
+  }
+  if (version > CURRENT_VERSION) {
     throw new Error(
       `Notebook version ${version} is newer than this app supports (${CURRENT_VERSION}).`,
     )
   }
-  if (typeof version === 'number' && version < CURRENT_VERSION) {
+  if (version < CURRENT_VERSION) {
     throw new Error(
       `Notebook version ${version} is older than this app supports (${CURRENT_VERSION}). This release introduced folders and is not backwards compatible.`,
     )
