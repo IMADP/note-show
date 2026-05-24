@@ -247,7 +247,7 @@ A few things to know:
 
 For anyone curious, the read and write logic is small enough to fit in your head. It lives in `src/lib/file-io.ts` and `src/lib/storage.ts` in the source tree.
 
-**AI agents.** If you want an AI tool to read or write to your notebook, point it at [the AI instructions page](#/ai). It describes the file structure and how to safely add folders and pages.
+**AI agents.** If you want an AI tool to read or write to your notebook, point it at [the AI instructions page](https://noteshow.io/ai.md). It describes the file structure and how to safely add folders and pages.
 
 ## Keyboard shortcuts
 

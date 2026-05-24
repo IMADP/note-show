@@ -5,7 +5,6 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
-import { AiRoute } from '@/features/ai/ai-route'
 import { BrowserGate } from '@/features/browser-gate'
 import { EmptyState } from '@/features/empty-state'
 import { PageRoute } from '@/features/page/page-route'
@@ -32,7 +31,6 @@ function App() {
     <TooltipProvider>
       <HashRouter>
         <Routes>
-          <Route path="/ai" element={<AiRoute />} />
           <Route
             path="*"
             element={
