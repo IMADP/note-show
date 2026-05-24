@@ -36,6 +36,21 @@ export function PageEdit() {
     el.select()
   }, [])
 
+  useEffect(() => {
+    const handler = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (discardOpen) return
+      e.preventDefault()
+      if (isDraftDirty(useAppStore.getState())) {
+        setDiscardOpen(true)
+      } else {
+        cancelEdit()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [discardOpen, cancelEdit])
+
   if (!draft) return null
 
   const handleCancel = () => {
