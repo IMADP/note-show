@@ -131,7 +131,7 @@ async function persist(
 ): Promise<void> {
   if (!handle) return
   try {
-    await writeFile(handle, { version: 2, folders })
+    await writeFile(handle, { version: 1, folders })
   } catch (err) {
     console.error('Failed to save notebook:', err)
     toast.error('Save failed', { description: describeError(err) })
@@ -302,7 +302,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     if (fileHandle) {
       try {
-        await writeFile(fileHandle, { version: 2, folders: nextFolders })
+        await writeFile(fileHandle, { version: 1, folders: nextFolders })
       } catch (err) {
         console.error('Failed to save notebook:', err)
         toast.error('Save failed', { description: describeError(err) })
@@ -355,7 +355,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const seededFolders = [buildWelcomeFolder()]
     try {
-      await writeFile(result.handle, { version: 2, folders: seededFolders })
+      await writeFile(result.handle, { version: 1, folders: seededFolders })
     } catch (err) {
       console.error('Failed to seed new file:', err)
       toast.error('Could not seed new file', { description: describeError(err) })

@@ -1,11 +1,11 @@
 import type { Folder } from '@/store/use-app-store'
 
 export type FileFormat = {
-  version: 2
+  version: 1
   folders: Folder[]
 }
 
-export const CURRENT_VERSION = 2 as const
+export const CURRENT_VERSION = 1 as const
 
 export function serialize(data: FileFormat): string {
   return JSON.stringify(data, null, 2)

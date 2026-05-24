@@ -272,7 +272,7 @@ The notebook on disk is a JSON document with a tiny shape:
 
 ```json
 {
-  "version": 2,
+  "version": 1,
   "folders": [
     {
       "id": "4f3e2d1c-0b9a-4c8d-9e7f-1a2b3c4d5e6f",

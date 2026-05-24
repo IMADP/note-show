@@ -44,7 +44,7 @@ export async function pickFileToCreate(): Promise<LoadedFile | null> {
       excludeAcceptAllOption: false,
       suggestedName: 'notebook.json',
     })
-    const data: FileFormat = { version: 2, folders: [] }
+    const data: FileFormat = { version: 1, folders: [] }
     await writeFile(handle, data)
     return { handle, data }
   } catch (err) {
