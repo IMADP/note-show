@@ -163,26 +163,7 @@ function buildWelcome(): Page {
 }
 ```
 
-A Python sample, for variety:
-
-```python
-from pathlib import Path
-import json
-
-def load_notebook(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
-
-def count_pages(path: Path) -> int:
-    data = load_notebook(path)
-    return sum(len(f.get("pages", [])) for f in data.get("folders", []))
-
-if __name__ == "__main__":
-    target = Path("notebook.json")
-    print(f"{count_pages(target)} pages in {target.name}")
-```
-
-And a chunk of shell, because every guide ends up with one eventually:
+You can also work with the notebook directly from the command line:
 
 ```bash
 # Back up your notebook before any risky operation.
@@ -225,44 +206,9 @@ $$
 \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
 $$
 
-You can mix math into a sentence and a display block in the same paragraph. Given a vector $\vec{v} \in \mathbb{R}^n$, its Euclidean norm is $\|\vec{v}\| = \sqrt{\vec{v} \cdot \vec{v}}$, expanded out:
-
-$$
-\|\vec{v}\| = \sqrt{\sum_{i=1}^{n} v_i^2}
-$$
-
 ### Horizontal rules
 
 A line with three dashes draws a horizontal rule. They are useful for separating sections that are not strictly headed.
-
----
-
-## A worked example
-
-Suppose you keep meeting notes in this notebook. Here is a single page, top to bottom, as you might write it.
-
-> **Team sync, April 8.** Present: Alex, Priya, Marcus. Apologies: Lena.
-
-### Updates
-
-- **Alex.** Wrapped the address validation rewrite. Two regressions caught in QA, both fixed. Ready to ship behind a flag next week.
-- **Priya.** Working through the Canopi integration. The mock server is up; she is blocked on credentials for the staging instance.
-- **Marcus.** Spike on the new rejection flow looks promising. He will write up findings by Friday.
-
-### Decisions
-
-1. Ship the address validation rewrite to staging on Monday, full rollout the following Friday.
-2. Move the Canopi cutover to next sprint to give Priya time to unblock.
-3. Marcus owns the write up; Alex will review.
-
-### Action items
-
-- [ ] Alex: open the feature flag PR by EOD Wednesday.
-- [ ] Priya: chase the staging credentials with platform-ops.
-- [ ] Marcus: post the spike write up to the team channel by Friday.
-- [x] Lena (deferred): catch up on the recording.
-
-That should be enough context for next week's review.
 
 ---
 
@@ -299,7 +245,9 @@ A few things to know:
 - **Whole file writes.** Every save serializes the entire structure and writes it atomically. There is no diffing.
 - **Forward compatibility.** The renderer refuses to open a file whose `version` is higher than it understands. If we ever change the schema, you will see a clear error rather than a corrupted notebook.
 
-For anyone curious, the read and write logic is small enough to fit in your head[^io]. It lives in `src/lib/file-io.ts` and `src/lib/storage.ts` in the source tree.
+For anyone curious, the read and write logic is small enough to fit in your head. It lives in `src/lib/file-io.ts` and `src/lib/storage.ts` in the source tree.
+
+**AI agents.** If you want an AI tool to read or write to your notebook, point it at [the AI instructions page](#/ai). It describes the file structure and how to safely add folders and pages.
 
 ## Keyboard shortcuts
 
@@ -346,33 +294,6 @@ Images via the standard `![alt](url)` markdown syntax render if the URL is reach
 
 Because rich text editors are leaky abstractions on top of HTML. The moment you adopt one, you inherit its quirks, its serialization format, and its inevitable disagreements with the next one. Plain markdown is portable, durable, and *legible* without the editor that produced it.
 
----
-
-## Roadmap
-
-The app is feature complete for the original goal. The remaining work is polish:
-
-- [x] Open and create files
-- [x] Add, rename, delete pages
-- [x] Per page edit and save cycle with confirm on cancel
-- [x] Markdown rendering with GFM, math, and syntax highlighting
-- [x] Doc style accents for headings, tables, blockquotes, and inline code
-- [x] Folders for organizing pages
-
-## Acknowledgments
-
-note-show is built on a small set of dependencies, each of which deserves a mention:
-
-1. [React](https://react.dev) and [Vite](https://vite.dev), for the obvious reasons.
-2. [Zustand](https://github.com/pmndrs/zustand), for being the simplest state library that does the job.
-3. [react-markdown](https://github.com/remarkjs/react-markdown), [remark-gfm](https://github.com/remarkjs/remark-gfm), [remark-math](https://github.com/remarkjs/remark-math), [KaTeX](https://katex.org), and [rehype-highlight](https://github.com/rehypejs/rehype-highlight), which together do the heavy lifting on the rendering side.
-4. [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com), for letting the visual layer come together quickly without locking it into one look.
-5. [@dnd-kit](https://dndkit.com), for the drag-and-drop on folders and pages.
-6. The File System Access API, which is the entire reason this app is possible without a backend.
-
-That is the whole list. Everything else is plumbing.
-
----
 
 ## Closing
 
