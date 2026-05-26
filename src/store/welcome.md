@@ -2,18 +2,16 @@
 
 This is **note show**, a single user, offline, local-first markdown notebook. Everything you type lives in one JSON file on your hard drive. No accounts, no servers, no sync, no telemetry. The browser is just a renderer; your data is yours.
 
-If you opened this page in a fresh notebook, you can safely delete it once you have read through. It is a regular page like any other, and the file you created is now ready for you to write in.
-
 ## The idea
 
-Note taking apps have a tendency to grow into platforms. They add sync, sharing, AI features, collaboration, plugin ecosystems, and an obligation to onboard. note-show is the opposite. It is a markdown editor that opens one file and writes to it. That is the whole product.
+Note taking apps have a tendency to grow into platforms. They add sync, sharing, AI features, collaboration, plugin ecosystems, and an obligation to onboard. Note show is the opposite. It is a markdown notebook that opens one file and saves to it. That's it.
 
 A few things follow from that:
 
-- **No database.** The notebook is a plain JSON document. You can copy it, version control it, diff it, grep it, back it up the same way you back up any other document.
-- **No server.** The page you are looking at right now is being served from your local browser. Close the tab and nothing is happening anywhere on your behalf.
-- **No accounts.** There is nothing to sign in to. There is no "your notebook" because the notebook is *literally* yours.
-- **One file, atomic writes.** Every save rewrites the whole file. Either the new version is on disk, or the old one is, never an in-between state.
+- **No database.** The notebook is a plain JSON file. You can back it up the same way you back up any other document.
+- **No server.** The page you are looking at right now is being served from your local browser. Close the tab and nothing is happening.
+- **No accounts.** There is no account because there is nothing to sign in to. 
+- **One file, atomic writes.** Every save rewrites the whole file. 
 
 > The point is to keep the source plain. There is no rich text toolbar, no contenteditable, no slash commands. You type markdown, and the app reads it back to you rendered. That is the contract.
 
